@@ -1,0 +1,45 @@
+name: Trigger auto deployment for container-app-afou2f75ioyi6
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/container-app-afou2f75ioyi6-AutoDeployTrigger-4b2fa0a8-0abd-4056-9f25-b261a2815c60.yml'
+
+  # Allow mannually trigger 
+  workflow_dispatch:      
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions: 
+      id-token: write #This is required for requesting the OIDC JWT Token
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.CONTAINERAPPAFOU2F75IOYI6_AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.CONTAINERAPPAFOU2F75IOYI6_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.CONTAINERAPPAFOU2F75IOYI6_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: containerregistryafou2f75ioyi6.azurecr.io
+          registryUsername: ${{ secrets.CONTAINERAPPAFOU2F75IOYI6_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.CONTAINERAPPAFOU2F75IOYI6_REGISTRY_PASSWORD }}
+          containerAppName: container-app-afou2f75ioyi6
+          resourceGroup: charris-indymeet9
+          imageToBuild: containerregistryafou2f75ioyi6.azurecr.io/container-app-afou2f75ioyi6:${{ github.sha }}
+          dockerfilePath: Dockerfile
+
+
